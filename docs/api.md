@@ -1,34 +1,115 @@
 # API Documentation
 
-Base URL: `/`
+Base URL: `/` (for local default: `http://localhost:8000`)
 
-## Core endpoints
+OpenAPI and interactive docs:
 
-- `POST /auth/register`
-- `POST /auth/login`
-- `GET /auth/me`
-- `POST /organizations`
-- `GET /organizations`
-- `POST /organizations/{organization_id}/onboarding`
-- `POST /organizations/{organization_id}/members`
+- `/docs`
+- `/openapi.json`
 
-## Compliance workflows
+## Authentication Model
 
-- `GET|POST /frameworks`
+- Most endpoints require `Authorization: Bearer <token>`.
+- Token is issued by `POST /auth/login`.
+- Token subject maps to `users.id`.
+
+## Core Identity and Tenancy
+
+### Auth
+
+- `POST /auth/register` - create user account
+- `POST /auth/login` - obtain access token
+- `GET /auth/me` - current authenticated user
+
+### Organizations
+
+- `POST /organizations` - create organization and owner membership
+- `GET /organizations` - list organizations available to user
+- `GET /organizations/{organization_id}/membership` - get caller membership role
+- `POST /organizations/{organization_id}/onboarding` - submit onboarding answers
+- `POST /organizations/{organization_id}/members` - invite existing user to org
+- `GET /organizations/{organization_id}/members` - list organization members
+
+## Compliance and Governance Endpoints
+
+### Framework Registry
+
+- `GET /frameworks`
+- `POST /frameworks/{organization_id}`
+
+### Data Inventory / RoPA
+
 - `POST /processing-activities/{organization_id}`
 - `GET /processing-activities/{organization_id}`
-- `POST /evidence/{organization_id}/upload`
+
+### Evidence Vault
+
+- `POST /evidence/{organization_id}/upload` (multipart upload)
 - `GET /evidence/{organization_id}`
+
+### Reports
+
 - `POST /reports/{organization_id}`
+- `GET /reports/{organization_id}`
 - `GET /reports/{organization_id}/{report_id}/export/{format}`
 
-## Security posture and integrations
+Supported `format`: `pdf`, `docx`, `csv`, `json`.
 
-- `POST /integrations/{organization_id}/connect` (GitHub implemented)
+### Dashboard and Score Explainability
+
+- `GET /dashboard/{organization_id}`
+- `GET /readiness/{organization_id}`
+
+## Security Posture and Integrations
+
+### Integrations
+
+- `POST /integrations/{organization_id}/connect` (GitHub currently supported)
 - `POST /integrations/{organization_id}/github/sync`
+- `GET /integrations/{organization_id}`
 - `GET /integrations/{organization_id}/findings`
+
+### Security Posture
+
+- `GET /security-posture/{organization_id}/integrations-state`
 - `POST /security-posture/{organization_id}/application-check`
 
-## Other modules
+## Workflow APIs
 
-- `/dpia`, `/workflows`, `/audit-logs`, `/trust-center`, `/billing`, `/assistant`, `/dashboard`, `/readiness`
+### DPIA
+
+- `POST /dpia/{organization_id}`
+- `GET /dpia/{organization_id}`
+
+### Incident, Vendor, DSR, Policy, Task
+
+- `POST|GET /workflows/{organization_id}/incidents`
+- `POST|GET /workflows/{organization_id}/vendors`
+- `POST|GET /workflows/{organization_id}/dsr`
+- `POST|GET /workflows/{organization_id}/policies`
+- `POST|GET /workflows/{organization_id}/tasks`
+- `PATCH /workflows/{organization_id}/tasks/{task_id}/status`
+
+## Trust, Billing, and Audit
+
+- `GET /audit-logs/{organization_id}`
+- `POST|GET /trust-center/{organization_id}/pages`
+- `POST /trust-center/{organization_id}/documents/{document_id}/approve`
+- `GET /trust-center/public/{organization_id}`
+- `GET /billing/{organization_id}`
+- `POST /billing/{organization_id}/admin-override`
+
+## Public Endpoints
+
+- `GET /public/health`
+- `GET /public/legal-pages`
+- `GET /public/legal-pages/{slug}`
+
+## Error Behavior
+
+- `401` for missing/invalid token
+- `403` for no membership or insufficient role
+- `404` for missing resources
+- `409` for conflicts (e.g. duplicate slug)
+- `422` for validation failures
+- `429` for rate-limit blocks

@@ -1,29 +1,60 @@
 # Architecture Documentation
 
-## System layers
+## Overview
 
-- `frontend/`: Next.js client application
-- `backend/app/routers`: API route modules
-- `backend/app/services.py`: core domain service helpers
-- `backend/app/models.py`: relational data model
+PrivacyOps Africa is implemented as a modular web application with a clear split between frontend UX and backend domain APIs.
 
-## Backend design
+- `frontend/` handles user workflows, module navigation, empty-state UX, and action forms.
+- `backend/app/routers` handles API surfaces by bounded module.
+- `backend/app/services.py` handles core business logic and helper operations.
+- `backend/app/models.py` defines relational persistence.
 
-- Router layer handles request/response and dependency injection
-- Service layer handles scoring, audit writes, exports, and integration sync logic
-- Data layer uses SQLAlchemy models with strict organization scoping
+## Layered Backend Design
 
-## Multi-tenant isolation
+### Router Layer
 
-- Each core record includes `organization_id`
-- Every protected endpoint checks membership and role
-- Audit logs are organization-scoped
+- Validates request payloads via Pydantic schemas.
+- Enforces authentication and authorization dependencies.
+- Converts service output into API responses.
 
-## Security controls
+### Service Layer
 
-- Password hashing (`bcrypt`)
-- JWT authentication
-- Role-based authorization
-- Upload size limits + file hash
-- Security headers middleware
-- API rate limiter middleware
+- Trust Readiness Score computation.
+- Readiness component breakdown.
+- Audit event recording.
+- Report export generation (`PDF`, `DOCX`, `CSV`, `JSON`).
+- Integration fetch/scan helpers (GitHub).
+
+### Data Layer
+
+- SQLAlchemy models for all tenancy, governance, and workflow entities.
+- Organization ownership represented through `organization_id` on tenant data.
+- Versioning entities for evidence and policies.
+
+## Frontend Design
+
+- Next.js app router with workspace route: `/app/[orgId]/[module]`.
+- Shared shell component with module navigation.
+- Module metadata registry (`frontend/lib/modules.ts`) to keep module UX wording structured.
+- API abstraction in `frontend/lib/api.ts` with token propagation.
+
+## Multi-Tenant Isolation in Runtime
+
+- Membership checks run before all protected data access.
+- Role checks restrict privileged actions (framework management, integrations, billing override).
+- Audit events are recorded per tenant context.
+
+## Security and Resilience Controls
+
+- Password hashing with `pbkdf2_sha256`.
+- JWT access-token authentication.
+- RBAC enforcement at endpoint level.
+- Rate-limiting middleware for abuse resistance.
+- Security headers middleware (`CSP`, `HSTS`, `X-Frame-Options`, `nosniff`, `Referrer-Policy`).
+- File upload size limits and SHA-256 hashing.
+
+## Operational Components
+
+- PostgreSQL as primary transactional store.
+- Redis available for queue/cache expansion.
+- Docker Compose orchestration for local and lower environments.

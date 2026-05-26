@@ -1,0 +1,18 @@
+# Documentation Index
+
+This directory contains operational and engineering documentation for PrivacyOps Africa.
+
+- `architecture.md` - system architecture and layer design
+- `api.md` - endpoint catalog and behavior
+- `database-schema.md` - schema model and domain mapping
+- `environment-variables.md` - backend/frontend config reference
+- `local-development.md` - local setup and first-run flow
+- `deployment.md` - deployment approach and production infrastructure guidance
+- `security-model.md` - security controls and hardening posture
+- `multi-tenant-model.md` - tenancy and isolation model
+- `integration-setup-guide.md` - integration setup and manual fallback
+- `compliance-framework-management.md` - framework lifecycle and governance
+- `ai-assistant-guardrails.md` - AI behavior and legal-risk constraints
+- `testing.md` - test strategy and execution
+- `contributing.md` - contribution standards
+- `production-checklist.md` - launch readiness checklist
