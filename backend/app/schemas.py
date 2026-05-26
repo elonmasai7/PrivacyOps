@@ -22,6 +22,18 @@ class UserLoginRequest(BaseModel):
     password: str = Field(min_length=1, max_length=128)
 
 
+class MFALoginVerifyRequest(BaseModel):
+    challenge_token: str
+    mfa_code: str = Field(min_length=6, max_length=8)
+
+
+class LoginChallengeResponse(BaseModel):
+    requires_mfa: bool = True
+    challenge_token: str
+    challenge_type: str = "totp"
+    expires_in_seconds: int
+
+
 class UserResponse(BaseModel):
     id: str
     email: EmailStr
@@ -31,6 +43,19 @@ class UserResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+class OAuthStartResponse(BaseModel):
+    provider: str
+    authorization_url: str | None
+    status: str
+    setup_instructions: str | None = None
+
+
+class OAuthCallbackRequest(BaseModel):
+    provider: str
+    code: str
+    redirect_uri: str | None = None
 
 
 class OrganizationCreateRequest(BaseModel):
@@ -173,7 +198,11 @@ class FrameworkResponse(BaseModel):
 
 class IntegrationConnectRequest(BaseModel):
     provider: str
-    personal_access_token: str = Field(min_length=10, max_length=255)
+    personal_access_token: str | None = Field(default=None, min_length=10, max_length=255)
+    aws_access_key_id: str | None = None
+    aws_secret_access_key: str | None = None
+    aws_session_token: str | None = None
+    aws_region: str | None = None
 
 
 class IntegrationResponse(BaseModel):
@@ -211,3 +240,24 @@ class AIResponse(BaseModel):
     requires_legal_review: bool
     source_references: list[str]
     next_action: str
+
+
+class MFASetupBeginResponse(BaseModel):
+    otp_auth_uri: str
+    manual_key: str
+    app_name: str
+
+
+class MFASetupConfirmRequest(BaseModel):
+    mfa_code: str = Field(min_length=6, max_length=8)
+
+
+class CheckoutSessionRequest(BaseModel):
+    plan_name: str
+    success_url: str
+    cancel_url: str
+
+
+class CheckoutSessionResponse(BaseModel):
+    checkout_url: str
+    session_id: str

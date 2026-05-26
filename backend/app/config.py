@@ -18,6 +18,22 @@ class Settings(BaseSettings):
 
     github_api_base: str = "https://api.github.com"
 
+    oauth_google_client_id: str | None = None
+    oauth_google_client_secret: str | None = None
+    oauth_google_authorize_url: str = "https://accounts.google.com/o/oauth2/v2/auth"
+    oauth_google_token_url: str = "https://oauth2.googleapis.com/token"
+    oauth_google_userinfo_url: str = "https://openidconnect.googleapis.com/v1/userinfo"
+    oauth_google_scopes: str = "openid email profile"
+    oauth_google_redirect_uri: str | None = None
+
+    stripe_secret_key: str | None = None
+    stripe_webhook_secret: str | None = None
+    stripe_price_starter: str | None = None
+    stripe_price_growth: str | None = None
+    stripe_price_enterprise: str | None = None
+
+    aws_region: str = "us-east-1"
+
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 
     @property

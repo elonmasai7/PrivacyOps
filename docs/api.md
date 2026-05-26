@@ -20,6 +20,12 @@ OpenAPI and interactive docs:
 - `POST /auth/register` - create user account
 - `POST /auth/login` - obtain access token
 - `GET /auth/me` - current authenticated user
+- `POST /auth/mfa/setup/begin` - start TOTP setup for logged-in user
+- `POST /auth/mfa/setup/confirm` - confirm TOTP enrollment
+- `POST /auth/mfa/verify-login` - complete login challenge when MFA is required
+- `GET /auth/oauth/providers` - list provider configuration status
+- `GET /auth/oauth/google/start` - generate Google OAuth authorization URL
+- `POST /auth/oauth/callback` - exchange OAuth code and log user in
 
 ### Organizations
 
@@ -66,6 +72,7 @@ Supported `format`: `pdf`, `docx`, `csv`, `json`.
 
 - `POST /integrations/{organization_id}/connect` (GitHub currently supported)
 - `POST /integrations/{organization_id}/github/sync`
+- `POST /integrations/{organization_id}/aws/sync`
 - `GET /integrations/{organization_id}`
 - `GET /integrations/{organization_id}/findings`
 
@@ -98,6 +105,8 @@ Supported `format`: `pdf`, `docx`, `csv`, `json`.
 - `GET /trust-center/public/{organization_id}`
 - `GET /billing/{organization_id}`
 - `POST /billing/{organization_id}/admin-override`
+- `POST /billing/{organization_id}/checkout-session`
+- `POST /billing/webhook`
 
 ## Public Endpoints
 
