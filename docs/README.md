@@ -16,3 +16,4 @@ This directory contains operational and engineering documentation for PrivacyOps
 - `testing.md` - test strategy and execution
 - `contributing.md` - contribution standards
 - `production-checklist.md` - launch readiness checklist
+- `runbooks/` - operational playbooks for incident response, integration triage, and audit preparation
