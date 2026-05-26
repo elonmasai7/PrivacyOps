@@ -1,0 +1,21 @@
+# Environment Variable Guide
+
+## Backend
+
+- `APP_NAME`
+- `APP_ENV`
+- `APP_HOST`
+- `APP_PORT`
+- `DATABASE_URL`
+- `JWT_SECRET`
+- `JWT_ALGORITHM`
+- `JWT_EXPIRY_MINUTES`
+- `CORS_ORIGINS`
+- `UPLOAD_DIR`
+- `MAX_UPLOAD_SIZE_MB`
+- `GITHUB_API_BASE`
+- `STRIPE_SECRET_KEY`
+
+## Frontend
+
+- `NEXT_PUBLIC_API_BASE_URL`
