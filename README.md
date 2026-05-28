@@ -17,6 +17,16 @@ It helps organizations operate practical readiness programs for:
 
 Privacy and security tooling is often expensive, opaque, or designed for non-African regulatory realities. PrivacyOps Africa Core is designed to be inspectable, configurable, and community-maintained so local teams can run trustworthy readiness workflows with real data.
 
+## Application architecture
+
+- **Presentation layer**: Next.js workspace UI (`frontend/app`) with role-aware module navigation and real-data forms.
+- **API layer**: FastAPI routers (`backend/app/routers`) expose module-bounded endpoints (auth, frameworks, workflows, reports, integrations, admin).
+- **Service layer**: Core business logic (`backend/app/services.py`) handles readiness scoring, scanning integrations, report generation, and audit helpers.
+- **Data layer**: SQLAlchemy domain models (`backend/app/models.py`) persist tenants, controls, evidence, workflows, findings, and logs in PostgreSQL.
+- **Operations layer**: Docker Compose (`docker-compose.yml`), export/upload storage, and CI workflows (`.github/workflows/ci.yml`) support self-hosted delivery.
+
+Full architecture and lifecycle visuals are in `docs/architecture.md`.
+
 ## What this project does
 
 - Organization workspaces with RBAC, audit logs, onboarding, and readiness scoring.

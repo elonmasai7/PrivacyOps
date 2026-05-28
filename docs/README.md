@@ -2,7 +2,7 @@
 
 This directory contains operational and engineering documentation for PrivacyOps Africa.
 
-- `architecture.md` - system architecture and layer design
+- `architecture.md` - application architecture, system layers, and runtime flow
 - `api.md` - endpoint catalog and behavior
 - `api-workflow-vendors.md` - vendors workflow API examples by OpenAPI tag
 - `api-workflow-incidents.md` - incidents workflow API examples by OpenAPI tag
