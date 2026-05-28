@@ -53,6 +53,15 @@ type Finding = {
   status: string;
 };
 
+type AdminHealth = {
+  database: string;
+  integrations_connected: number;
+  integrations_total: number;
+  failed_jobs: number;
+  framework_packs_reviewed: number;
+  framework_packs_total: number;
+};
+
 type DashboardData = {
   organization: { name: string; trust_readiness_score: number };
   framework_scores: Record<string, number>;
@@ -341,6 +350,7 @@ function IntegrationsPanel({ orgId }: { orgId: string }) {
   const [integrations, setIntegrations] = useState<Integration[]>([]);
   const [findings, setFindings] = useState<Finding[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [provider, setProvider] = useState<"github" | "gitlab">("github");
   const [token, setToken] = useState("");
 
   const load = () => {
@@ -363,7 +373,7 @@ function IntegrationsPanel({ orgId }: { orgId: string }) {
     try {
       await apiFetch(`/integrations/${orgId}/connect`, {
         method: "POST",
-        body: JSON.stringify({ provider: "github", personal_access_token: token }),
+        body: JSON.stringify({ provider, personal_access_token: token }),
       });
       setToken("");
       load();
@@ -382,16 +392,33 @@ function IntegrationsPanel({ orgId }: { orgId: string }) {
     }
   }
 
+  async function syncGitlab() {
+    setError(null);
+    try {
+      await apiFetch(`/integrations/${orgId}/gitlab/sync`, { method: "POST" });
+      load();
+    } catch (err) {
+      setError((err as Error).message);
+    }
+  }
+
   return (
     <section className="space-y-4">
       <div className="panel p-5">
-        <h2 className="text-lg font-semibold">Connect GitHub</h2>
-        <p className="mt-1 text-sm text-slate-600">Use a real personal access token with least privilege repository read permissions.</p>
+        <h2 className="text-lg font-semibold">Connect SCM provider</h2>
+        <p className="mt-1 text-sm text-slate-600">Use a real personal access token with least privilege read permissions.</p>
+        <div className="mt-3 flex gap-3 text-sm">
+          <label className="flex items-center gap-2"><input type="radio" name="provider" checked={provider === "github"} onChange={() => setProvider("github")} />GitHub</label>
+          <label className="flex items-center gap-2"><input type="radio" name="provider" checked={provider === "gitlab"} onChange={() => setProvider("gitlab")} />GitLab</label>
+        </div>
         <form className="mt-3 flex flex-col gap-2 md:flex-row" onSubmit={connect}>
-          <input className="w-full rounded-md border p-2" type="password" placeholder="github_pat_..." value={token} onChange={(e) => setToken(e.target.value)} required />
+          <input className="w-full rounded-md border p-2" type="password" placeholder={provider === "github" ? "github_pat_..." : "glpat-..."} value={token} onChange={(e) => setToken(e.target.value)} required />
           <button className="rounded-md bg-baobab-700 px-4 py-2 text-white">Connect</button>
         </form>
-        <button className="mt-3 rounded-md border px-4 py-2 text-sm" onClick={syncGithub}>Run GitHub security sync</button>
+        <div className="mt-3 flex flex-wrap gap-2">
+          <button className="rounded-md border px-4 py-2 text-sm" onClick={syncGithub} type="button">Run GitHub security sync</button>
+          <button className="rounded-md border px-4 py-2 text-sm" onClick={syncGitlab} type="button">Run GitLab security sync</button>
+        </div>
         {error ? <p className="mt-3 text-sm text-red-700">{error}</p> : null}
       </div>
 
@@ -416,7 +443,7 @@ function IntegrationsPanel({ orgId }: { orgId: string }) {
       <div className="panel p-5">
         <h3 className="text-base font-semibold">Security findings</h3>
         {findings.length === 0 ? (
-          <p className="mt-2 text-sm text-slate-600">No findings yet. Connect and sync GitHub to pull real posture findings.</p>
+          <p className="mt-2 text-sm text-slate-600">No findings yet. Connect GitHub or GitLab and run sync to pull real posture findings.</p>
         ) : (
           <div className="mt-2 space-y-2">
             {findings.map((finding) => (
@@ -428,6 +455,108 @@ function IntegrationsPanel({ orgId }: { orgId: string }) {
           </div>
         )}
       </div>
+    </section>
+  );
+}
+
+function AdminPanel({ orgId }: { orgId: string }) {
+  const [health, setHealth] = useState<AdminHealth | null>(null);
+  const [settings, setSettings] = useState<Record<string, string>>({});
+  const [aiEnabled, setAiEnabled] = useState(false);
+  const [jobs, setJobs] = useState<Array<{ id: string; job_type: string; status: string }>>([]);
+  const [errors, setErrors] = useState<Array<{ id: string; provider: string; last_error: string }>>([]);
+  const [error, setError] = useState<string | null>(null);
+
+  const load = () => {
+    apiFetch<AdminHealth>(`/admin/${orgId}/system-health`).then(setHealth).catch((err) => setError((err as Error).message));
+    apiFetch<Record<string, string>>(`/admin/${orgId}/settings`)
+      .then((data) => {
+        setSettings(data);
+        setAiEnabled(data.ai_assistant_enabled === "true");
+      })
+      .catch(() => undefined);
+    apiFetch<Array<{ id: string; job_type: string; status: string }>>(`/admin/${orgId}/jobs`).then(setJobs).catch(() => undefined);
+    apiFetch<Array<{ id: string; provider: string; last_error: string }>>(`/admin/${orgId}/integration-errors`).then(setErrors).catch(() => undefined);
+  };
+
+  useEffect(() => {
+    load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [orgId]);
+
+  async function saveAISetting() {
+    setError(null);
+    try {
+      await apiFetch(`/admin/${orgId}/settings`, {
+        method: "PUT",
+        body: JSON.stringify({ key: "ai_assistant_enabled", value: aiEnabled ? "true" : "false" }),
+      });
+      load();
+    } catch (err) {
+      setError((err as Error).message);
+    }
+  }
+
+  async function queueJob(jobType: string) {
+    setError(null);
+    try {
+      await apiFetch(`/admin/${orgId}/jobs`, {
+        method: "POST",
+        body: JSON.stringify({ job_type: jobType, payload: {} }),
+      });
+      load();
+    } catch (err) {
+      setError((err as Error).message);
+    }
+  }
+
+  return (
+    <section className="space-y-4">
+      <div className="panel p-5">
+        <h2 className="text-lg font-semibold">System health</h2>
+        {!health ? (
+          <p className="mt-2 text-sm text-slate-600">Loading health status...</p>
+        ) : (
+          <div className="mt-2 grid gap-3 md:grid-cols-3 text-sm">
+            <div className="rounded-md border p-3">DB: <span className="font-semibold">{health.database}</span></div>
+            <div className="rounded-md border p-3">Integrations: <span className="font-semibold">{health.integrations_connected}/{health.integrations_total}</span></div>
+            <div className="rounded-md border p-3">Failed jobs: <span className="font-semibold">{health.failed_jobs}</span></div>
+            <div className="rounded-md border p-3">Reviewed packs: <span className="font-semibold">{health.framework_packs_reviewed}/{health.framework_packs_total}</span></div>
+          </div>
+        )}
+      </div>
+
+      <div className="panel p-5">
+        <h3 className="text-base font-semibold">AI safety setting</h3>
+        <p className="mt-1 text-sm text-slate-600">AI assistant is disabled by default. Enable only when policy and legal review controls are active.</p>
+        <label className="mt-3 flex items-center gap-2 text-sm">
+          <input type="checkbox" checked={aiEnabled} onChange={(e) => setAiEnabled(e.target.checked)} />
+          Enable AI assistant for this organization
+        </label>
+        <button className="mt-3 rounded-md bg-baobab-700 px-4 py-2 text-sm text-white" onClick={saveAISetting} type="button">
+          Save setting
+        </button>
+        <p className="mt-2 text-xs text-slate-500">Current keys: {Object.keys(settings).join(", ") || "none"}</p>
+      </div>
+
+      <div className="panel p-5">
+        <h3 className="text-base font-semibold">Background jobs</h3>
+        <div className="mt-2 flex flex-wrap gap-2">
+          <button className="rounded-md border px-3 py-1 text-sm" type="button" onClick={() => queueJob("report.generate.batch")}>Queue report batch</button>
+          <button className="rounded-md border px-3 py-1 text-sm" type="button" onClick={() => queueJob("integrations.sync.batch")}>Queue integration sync</button>
+        </div>
+        <div className="mt-3 space-y-2 text-sm">
+          {jobs.length === 0 ? <p className="text-slate-600">No jobs queued yet.</p> : jobs.map((job) => <div key={job.id} className="rounded-md border p-2">{job.job_type} - {job.status}</div>)}
+        </div>
+      </div>
+
+      <div className="panel p-5">
+        <h3 className="text-base font-semibold">Integration errors</h3>
+        <div className="mt-3 space-y-2 text-sm">
+          {errors.length === 0 ? <p className="text-slate-600">No integration errors detected.</p> : errors.map((item) => <div key={item.id} className="rounded-md border p-2"><p className="font-medium">{item.provider}</p><p className="text-red-700">{item.last_error}</p></div>)}
+        </div>
+      </div>
+      {error ? <p className="rounded-md bg-red-50 p-3 text-sm text-red-700">{error}</p> : null}
     </section>
   );
 }
@@ -456,6 +585,7 @@ export default function ModuleRoutePage({ params }: Props) {
       {params.module === "integrations" || params.module === "security-posture" ? (
         <IntegrationsPanel orgId={params.orgId} />
       ) : null}
+      {params.module === "admin" ? <AdminPanel orgId={params.orgId} /> : null}
     </div>
   );
 }

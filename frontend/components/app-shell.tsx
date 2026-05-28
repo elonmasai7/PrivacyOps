@@ -25,6 +25,7 @@ const moduleLinks = [
   ["Billing", "billing"],
   ["Audit Logs", "audit-logs"],
   ["Settings", "settings"],
+  ["Admin Panel", "admin"],
 ];
 
 export function AppShell({ orgId, children }: { orgId: string; children: React.ReactNode }) {

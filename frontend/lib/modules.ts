@@ -107,7 +107,7 @@ export const moduleMeta: Record<string, { title: string; subtitle: string; empty
     title: "Integrations",
     subtitle: "Connect data sources for automated evidence, findings, alerts, and sync history.",
     emptyHeading: "No active integrations",
-    emptyBody: "Connect GitHub first for automated posture findings. Others can remain manual until configured.",
+    emptyBody: "Connect GitHub or GitLab first for automated posture findings. Others can remain manual until configured.",
     cta: "Connect Integration",
   },
   tasks: {
@@ -141,5 +141,11 @@ export const moduleMeta: Record<string, { title: string; subtitle: string; empty
     subtitle: "Manage organization profile, role controls, retention preferences, and security settings.",
     emptyHeading: "No additional settings configured",
     emptyBody: "Add profile data and workflow defaults as your governance program matures.",
+  },
+  admin: {
+    title: "Self-Hosted Admin Panel",
+    subtitle: "Manage framework-pack trust states, system settings, integration errors, and background jobs.",
+    emptyHeading: "No admin actions yet",
+    emptyBody: "Use this module to maintain platform health and governance on your own deployment.",
   },
 };

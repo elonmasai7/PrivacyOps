@@ -14,13 +14,11 @@ export function setToken(token: string) {
 }
 
 export async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
-  const headers: HeadersInit = {
-    "Content-Type": "application/json",
-    ...(init?.headers ?? {}),
-  };
+  const headers = new Headers(init?.headers ?? {});
+  headers.set("Content-Type", "application/json");
   const token = getToken();
   if (token) {
-    headers.Authorization = `Bearer ${token}`;
+    headers.set("Authorization", `Bearer ${token}`);
   }
 
   const res = await fetch(`${API_BASE}${path}`, {
@@ -36,10 +34,10 @@ export async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> 
 }
 
 export async function apiFetchForm<T>(path: string, form: FormData): Promise<T> {
-  const headers: HeadersInit = {};
+  const headers = new Headers();
   const token = getToken();
   if (token) {
-    headers.Authorization = `Bearer ${token}`;
+    headers.set("Authorization", `Bearer ${token}`);
   }
   const res = await fetch(`${API_BASE}${path}`, {
     method: "POST",
