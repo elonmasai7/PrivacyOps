@@ -1,8 +1,12 @@
 # Architecture Documentation
 
+![PrivacyOps Africa Core Architecture](assets/architecture-core.svg)
+
+![PrivacyOps Africa Core Readiness Loop](assets/readiness-loop.svg)
+
 ## Overview
 
-PrivacyOps Africa is implemented as a modular web application with a clear split between frontend UX and backend domain APIs.
+PrivacyOps Africa Core is implemented as a modular web application with a clear split between frontend UX and backend domain APIs.
 
 - `frontend/` handles user workflows, module navigation, empty-state UX, and action forms.
 - `backend/app/routers` handles API surfaces by bounded module.
@@ -23,7 +27,7 @@ PrivacyOps Africa is implemented as a modular web application with a clear split
 - Readiness component breakdown.
 - Audit event recording.
 - Report export generation (`PDF`, `DOCX`, `CSV`, `JSON`).
-- Integration fetch/scan helpers (GitHub).
+- Integration fetch/scan helpers (GitHub, GitLab, AWS).
 
 ### Data Layer
 
@@ -58,3 +62,4 @@ PrivacyOps Africa is implemented as a modular web application with a clear split
 - PostgreSQL as primary transactional store.
 - Redis available for queue/cache expansion.
 - Docker Compose orchestration for local and lower environments.
+- CI pipeline for backend tests and frontend lint/typecheck/build gates.

@@ -10,6 +10,15 @@ The current test suite focuses on acceptance-critical backend workflows and tena
 pytest backend/tests -q
 ```
 
+Frontend quality checks (non-interactive):
+
+```bash
+cd frontend
+npm run ci:check
+```
+
+CI pipeline file: `.github/workflows/ci.yml`.
+
 ## Current Coverage
 
 ### Core user journey
@@ -25,11 +34,14 @@ pytest backend/tests -q
 - upload evidence file
 - generate report
 - download report export
+- workflow CRUD parity for vendors, incidents, DSR, policies, and tasks
+- workflow export parity (`CSV`, `JSON`, `PDF`) for operational modules
 
 ### Security and tenancy
 
 - cross-tenant access denied
 - role-based denied action checks
+- GitLab integration connect + sync scanning path (mocked)
 
 ## Test Runtime Design
 

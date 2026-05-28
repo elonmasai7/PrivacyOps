@@ -8,6 +8,7 @@ from fastapi.responses import JSONResponse
 from app.config import settings
 from app.database import Base, engine
 from app.routers import (
+    admin,
     assistant,
     audit,
     auth,
@@ -28,7 +29,27 @@ from app.routers import (
     workflows,
 )
 
-app = FastAPI(title=settings.app_name)
+OPENAPI_TAGS = [
+    {"name": "auth", "description": "User authentication, MFA, and OAuth flows."},
+    {"name": "organizations", "description": "Organization lifecycle, onboarding, and memberships."},
+    {"name": "frameworks", "description": "Framework registry and framework pack governance."},
+    {"name": "processing_activities", "description": "Data inventory and RoPA processing activities."},
+    {"name": "evidence", "description": "Evidence Vault uploads and listing."},
+    {"name": "reports", "description": "Readiness report generation and export."},
+    {"name": "integrations", "description": "External integration setup and sync operations."},
+    {"name": "security_posture", "description": "Application and integration posture checks."},
+    {"name": "dpia", "description": "DPIA creation and tracking."},
+    {"name": "workflow-vendors", "description": "Vendor risk workflow API endpoints."},
+    {"name": "workflow-incidents", "description": "Incident and breach workflow API endpoints."},
+    {"name": "workflow-dsr", "description": "Data subject request workflow API endpoints."},
+    {"name": "workflow-policies", "description": "Policy lifecycle workflow API endpoints."},
+    {"name": "workflow-tasks", "description": "Task management workflow API endpoints."},
+    {"name": "assistant", "description": "Optional AI assistant operations (disabled by default)."},
+    {"name": "admin", "description": "Self-hosted admin operations and system controls."},
+    {"name": "audit_logs", "description": "Audit trail retrieval endpoints."},
+]
+
+app = FastAPI(title=settings.app_name, openapi_tags=OPENAPI_TAGS)
 
 app.add_middleware(
     CORSMiddleware,
@@ -81,6 +102,7 @@ app.include_router(auth.router)
 app.include_router(organizations.router)
 app.include_router(readiness.router)
 app.include_router(frameworks.router)
+app.include_router(admin.router)
 app.include_router(processing_activities.router)
 app.include_router(evidence.router)
 app.include_router(reports.router)

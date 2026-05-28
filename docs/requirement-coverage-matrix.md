@@ -13,8 +13,8 @@ Legend:
 | Area | Status | Notes |
 |---|---|---|
 | Auth (email/password) | done | Register/login/me endpoints and UI are live |
-| OAuth | missing | Not implemented yet |
-| MFA | missing | Data flag exists; challenge flow not implemented |
+| OAuth | done | Google OAuth start/callback flow implemented |
+| MFA | done | TOTP setup + challenge verification implemented |
 | Session management | partial | JWT-only; no refresh token rotation/revocation layer |
 | Org workspace creation | done | Organization creation + owner membership |
 | Team invitations | partial | Invite existing users only; no email invite flow |
@@ -25,7 +25,7 @@ Legend:
 
 | Area | Status | Notes |
 |---|---|---|
-| Framework registry (versioned) | partial | Core models and create/list available |
+| Framework registry (versioned) | partial | Core models + pack import/export + review states available |
 | Kenya DPA readiness | partial | Generic readiness + workflows; full legal control library pending |
 | GDPR readiness | partial | Generic readiness + RoPA workflows; complete control content pending |
 | SOC 2 readiness | partial | Report/readiness scaffolding; full TSC control engine pending |
@@ -36,13 +36,13 @@ Legend:
 
 | Area | Status | Notes |
 |---|---|---|
-| Data inventory / RoPA | done | CRUD create/list exists with core fields |
+| Data inventory / RoPA | done | Create/list/update/delete + search/filter + export available |
 | DPIA workflow | partial | Create/list + scoring exists; review/approval pipeline needs expansion |
-| DSR workflow | partial | Core workflow exists; templates/SLA automation incomplete |
-| Incident and breach management | partial | Core capture exists; full breach-pack templates pending |
-| Vendor risk management | partial | Vendor records exist; questionnaire/scoring automation pending |
-| Policy center | partial | Draft/version base exists; acknowledgement workflows incomplete |
-| Task management | partial | Core task create/list/status exists; reminder automation pending |
+| DSR workflow | done | Full CRUD/filter/export parity implemented |
+| Incident and breach management | partial | Full CRUD/filter/export implemented; deeper breach-pack templates pending |
+| Vendor risk management | partial | Full CRUD/filter/export implemented; questionnaire/scoring automation pending |
+| Policy center | partial | Full CRUD/filter/export + versioning updates implemented; acknowledgement workflows incomplete |
+| Task management | partial | Full CRUD/filter/export implemented; reminder automation pending |
 
 ## Evidence, reports, trust
 
@@ -57,7 +57,8 @@ Legend:
 | Area | Status | Notes |
 |---|---|---|
 | GitHub integration | partial | Real connect + sync checks implemented; coverage should expand |
-| GitLab/AWS/Google/MS/Cloudflare/etc | missing | Not implemented yet |
+| GitLab/AWS integrations | partial | Real connect + sync for GitLab and AWS implemented |
+| Google/MS/Cloudflare/etc | missing | Not implemented yet |
 | App security header checks | done | URL-based header check endpoint implemented |
 | Integration health dashboard | partial | Basic visibility exists |
 
@@ -67,7 +68,7 @@ Legend:
 |---|---|---|
 | Billing (Stripe live) | partial | Billing state endpoint exists; live Stripe checkout/webhooks pending |
 | Notifications | partial | In-app model exists; email/slack/teams/webhook delivery pending |
-| AI assistant guardrails | partial | Legal-review flagging and structured response present; model provider orchestration pending |
+| AI assistant guardrails | partial | Structured guardrails + disabled-by-default org gating; provider abstraction still pending |
 
 ## Platform security and operations
 
@@ -99,10 +100,9 @@ Legend:
 
 ## Critical gaps to close first
 
-1. OAuth + MFA + stronger session lifecycle (refresh/revocation).
-2. Complete framework control packs and control-to-evidence mapping flows.
-3. Expand integrations beyond GitHub (AWS and one identity provider next).
-4. Stripe checkout + billing webhook validation and entitlement enforcement.
-5. Notification delivery channels (email + Slack) with retries.
-6. Observability stack: structured logs, error tracking, alerting, health SLOs.
-7. Expand test coverage for tenancy, integrations, reports, and security controls.
+1. Stronger session lifecycle (refresh/revocation) and account recovery workflows.
+2. Complete framework control packs and deeper control-to-evidence mapping flows.
+3. Expand integrations beyond GitHub and AWS (identity and cloud productivity providers next).
+4. Notification delivery channels (email + Slack/webhook) with retries.
+5. Observability stack: structured logs, error tracking, alerting, health SLOs.
+6. Expand test coverage for tenancy edge cases, integrations, reports, and security controls.

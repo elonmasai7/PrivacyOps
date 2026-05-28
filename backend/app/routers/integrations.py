@@ -9,7 +9,7 @@ from app.database import get_db
 from app.dependencies import get_current_user, require_org_membership, require_role
 from app.models import Integration, IntegrationProvider, IntegrationToken, RoleName, SecurityFinding, User
 from app.schemas import IntegrationConnectRequest, IntegrationResponse, SecurityFindingResponse
-from app.services import scan_aws, scan_github, validate_aws_credentials, write_audit_log
+from app.services import scan_aws, scan_github, scan_gitlab, validate_aws_credentials, write_audit_log
 
 router = APIRouter(prefix="/integrations", tags=["integrations"])
 
@@ -24,7 +24,7 @@ async def connect_integration(
     membership = require_org_membership(organization_id, user, db)
     require_role(membership, {RoleName.owner, RoleName.admin, RoleName.security_manager})
 
-    if payload.provider not in {IntegrationProvider.github.value, IntegrationProvider.aws.value}:
+    if payload.provider not in {IntegrationProvider.github.value, IntegrationProvider.gitlab.value, IntegrationProvider.aws.value}:
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             detail=(
@@ -36,20 +36,30 @@ async def connect_integration(
     config = {}
     provider_enum = IntegrationProvider(payload.provider)
     token_ref = ""
-    if payload.provider == IntegrationProvider.github.value:
+    if payload.provider in {IntegrationProvider.github.value, IntegrationProvider.gitlab.value}:
         if not payload.personal_access_token:
             raise HTTPException(status_code=422, detail="personal_access_token is required")
-        headers = {
-            "Accept": "application/vnd.github+json",
-            "Authorization": f"Bearer {payload.personal_access_token}",
-            "X-GitHub-Api-Version": "2022-11-28",
-        }
-        async with httpx.AsyncClient(timeout=20) as client:
-            test = await client.get(f"{settings.github_api_base}/user", headers=headers)
-        if test.status_code != 200:
-            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="GitHub token validation failed")
+        if payload.provider == IntegrationProvider.github.value:
+            headers = {
+                "Accept": "application/vnd.github+json",
+                "Authorization": f"Bearer {payload.personal_access_token}",
+                "X-GitHub-Api-Version": "2022-11-28",
+            }
+            async with httpx.AsyncClient(timeout=20) as client:
+                test = await client.get(f"{settings.github_api_base}/user", headers=headers)
+            if test.status_code != 200:
+                raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="GitHub token validation failed")
+            token_ref = "github_pat"
+
+        if payload.provider == IntegrationProvider.gitlab.value:
+            headers = {"PRIVATE-TOKEN": payload.personal_access_token}
+            async with httpx.AsyncClient(timeout=20) as client:
+                test = await client.get(f"{settings.gitlab_api_base}/user", headers=headers)
+            if test.status_code != 200:
+                raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="GitLab token validation failed")
+            token_ref = "gitlab_pat"
+
         config = {"personal_access_token": payload.personal_access_token}
-        token_ref = "github_pat"
 
     if payload.provider == IntegrationProvider.aws.value:
         if not payload.aws_access_key_id or not payload.aws_secret_access_key:
@@ -141,6 +151,47 @@ async def sync_github_findings(
         organization_id=organization_id,
         actor_user_id=user.id,
         action="integration.github_synced",
+        target_type="integration",
+        target_id=integration.id,
+        metadata={"finding_count": len(findings)},
+    )
+    return findings
+
+
+@router.post("/{organization_id}/gitlab/sync", response_model=list[SecurityFindingResponse])
+async def sync_gitlab_findings(
+    organization_id: str,
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    membership = require_org_membership(organization_id, user, db)
+    require_role(membership, {RoleName.owner, RoleName.admin, RoleName.security_manager})
+
+    integration = (
+        db.query(Integration)
+        .filter(Integration.organization_id == organization_id, Integration.provider == IntegrationProvider.gitlab)
+        .first()
+    )
+    if not integration or integration.status != "connected":
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="GitLab is not connected. Add a token first to run real checks.",
+        )
+
+    try:
+        findings = await scan_gitlab(integration, db)
+    except httpx.HTTPStatusError as exc:
+        integration.last_error = str(exc)
+        integration.status = "error"
+        db.add(integration)
+        db.commit()
+        raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail="GitLab scan failed") from exc
+
+    write_audit_log(
+        db,
+        organization_id=organization_id,
+        actor_user_id=user.id,
+        action="integration.gitlab_synced",
         target_type="integration",
         target_id=integration.id,
         metadata={"finding_count": len(findings)},

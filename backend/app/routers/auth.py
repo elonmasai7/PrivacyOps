@@ -129,7 +129,7 @@ def begin_mfa_setup(user: User = Depends(get_current_user), db: Session = Depend
     db.add(user)
     db.commit()
 
-    app_name = "PrivacyOps Africa"
+    app_name = "PrivacyOps Africa Core"
     otp_auth_uri = pyotp.TOTP(secret).provisioning_uri(name=user.email, issuer_name=app_name)
     return MFASetupBeginResponse(otp_auth_uri=otp_auth_uri, manual_key=secret, app_name=app_name)
 

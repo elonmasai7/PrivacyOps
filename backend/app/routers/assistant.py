@@ -1,9 +1,9 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.dependencies import get_current_user, require_org_membership
-from app.models import User
+from app.models import SystemSetting, User
 from app.schemas import AIRequest, AIResponse
 from app.services import ai_guardrailed_response, write_audit_log
 
@@ -18,6 +18,17 @@ def ask_assistant(
     db: Session = Depends(get_db),
 ):
     require_org_membership(organization_id, user, db)
+    ai_setting = (
+        db.query(SystemSetting)
+        .filter(SystemSetting.organization_id == organization_id, SystemSetting.key == "ai_assistant_enabled")
+        .first()
+    )
+    enabled = ai_setting.value.lower() == "true" if ai_setting else False
+    if not enabled:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="AI assistant is disabled. Enable system setting ai_assistant_enabled=true to use this module.",
+        )
     response = ai_guardrailed_response(payload.prompt, payload.context)
     write_audit_log(
         db,

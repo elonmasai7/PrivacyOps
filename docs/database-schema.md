@@ -17,7 +17,7 @@
 ## Framework and Control Registry
 
 - `frameworks`: framework records with status/jurisdiction/source.
-- `framework_versions`: immutable version snapshots and reviewer metadata.
+- `framework_versions`: immutable version snapshots, reviewer metadata, and review trust state.
 - `control_categories`: grouped control domains.
 - `controls`: detailed controls with requirement/evidence/risk weight.
 - `requirements`: sub-requirement decomposition.
@@ -62,6 +62,8 @@
 
 - `tasks`, `notifications`: action tracking and user communication.
 - `billing_customers`, `subscriptions`: billing state linkage.
+- `system_settings`: organization-level platform settings (including AI module toggle).
+- `background_jobs`: queue/workflow execution visibility and failures.
 - `audit_logs`: immutable action trail with actor/target context.
 
 ## Tenancy Enforcement

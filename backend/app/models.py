@@ -128,8 +128,11 @@ class FrameworkVersion(Base, TimestampMixin):
     id: Mapped[str] = mapped_column(String, primary_key=True, default=_id)
     framework_id: Mapped[str] = mapped_column(ForeignKey("frameworks.id", ondelete="CASCADE"), nullable=False)
     version: Mapped[str] = mapped_column(String(50), nullable=False)
+    review_status: Mapped[str] = mapped_column(String(40), nullable=False, default="unverified")
     reviewer_name: Mapped[str] = mapped_column(String(255), nullable=True)
     last_reviewed_at: Mapped[datetime] = mapped_column(DateTime, nullable=True)
+    reviewer_notes: Mapped[str] = mapped_column(Text, nullable=True)
+    source_reference: Mapped[str] = mapped_column(String(500), nullable=True)
     changelog: Mapped[dict] = mapped_column(JSON, default=dict, nullable=False)
 
 
@@ -580,3 +583,25 @@ class PolicyAcknowledgement(Base):
     policy_id: Mapped[str] = mapped_column(ForeignKey("policies.id", ondelete="CASCADE"), nullable=False)
     user_id: Mapped[str] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
     acknowledged_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
+
+
+class SystemSetting(Base, TimestampMixin):
+    __tablename__ = "system_settings"
+
+    id: Mapped[str] = mapped_column(String, primary_key=True, default=_id)
+    organization_id: Mapped[str] = mapped_column(ForeignKey("organizations.id", ondelete="CASCADE"), nullable=False, index=True)
+    key: Mapped[str] = mapped_column(String(120), nullable=False)
+    value: Mapped[str] = mapped_column(Text, nullable=False)
+
+
+class BackgroundJob(Base, TimestampMixin):
+    __tablename__ = "background_jobs"
+
+    id: Mapped[str] = mapped_column(String, primary_key=True, default=_id)
+    organization_id: Mapped[str] = mapped_column(ForeignKey("organizations.id", ondelete="CASCADE"), nullable=False, index=True)
+    job_type: Mapped[str] = mapped_column(String(120), nullable=False)
+    status: Mapped[str] = mapped_column(String(40), nullable=False, default="queued")
+    payload: Mapped[dict] = mapped_column(JSON, default=dict, nullable=False)
+    error_message: Mapped[str] = mapped_column(Text, nullable=True)
+    started_at: Mapped[datetime] = mapped_column(DateTime, nullable=True)
+    finished_at: Mapped[datetime] = mapped_column(DateTime, nullable=True)

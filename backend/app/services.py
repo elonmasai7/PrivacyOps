@@ -238,6 +238,82 @@ async def scan_github(integration: Integration, db: Session) -> list[SecurityFin
     return findings
 
 
+async def scan_gitlab(integration: Integration, db: Session) -> list[SecurityFinding]:
+    token = integration.config.get("personal_access_token")
+    headers = {"PRIVATE-TOKEN": token}
+
+    findings: list[SecurityFinding] = []
+    async with httpx.AsyncClient(timeout=30) as client:
+        projects_response = await client.get(
+            f"{settings.gitlab_api_base}/projects",
+            headers=headers,
+            params={"membership": "true", "simple": "true", "per_page": 100, "archived": "false"},
+        )
+        projects_response.raise_for_status()
+        projects = projects_response.json()
+
+        for project in projects[:100]:
+            project_id = project.get("id")
+            project_name = project.get("path_with_namespace", str(project_id))
+            default_branch = project.get("default_branch")
+
+            if project.get("visibility") == "public":
+                findings.append(
+                    SecurityFinding(
+                        organization_id=integration.organization_id,
+                        integration_id=integration.id,
+                        title=f"Public project detected: {project_name}",
+                        severity="medium",
+                        category="repository_visibility",
+                        details={"project": project_name, "visibility": "public"},
+                    )
+                )
+
+            if default_branch:
+                protected_resp = await client.get(
+                    f"{settings.gitlab_api_base}/projects/{project_id}/protected_branches/{default_branch}",
+                    headers=headers,
+                )
+                if protected_resp.status_code == 404:
+                    findings.append(
+                        SecurityFinding(
+                            organization_id=integration.organization_id,
+                            integration_id=integration.id,
+                            title=f"Protected branch missing: {project_name}",
+                            severity="high",
+                            category="branch_protection",
+                            details={"project": project_name, "default_branch": default_branch},
+                        )
+                    )
+
+            approvals_resp = await client.get(
+                f"{settings.gitlab_api_base}/projects/{project_id}/approvals",
+                headers=headers,
+            )
+            if approvals_resp.status_code == 200:
+                approvals_before_merge = approvals_resp.json().get("approvals_before_merge", 0)
+                if approvals_before_merge == 0:
+                    findings.append(
+                        SecurityFinding(
+                            organization_id=integration.organization_id,
+                            integration_id=integration.id,
+                            title=f"Required merge approvals missing: {project_name}",
+                            severity="medium",
+                            category="merge_approval_policy",
+                            details={"project": project_name, "approvals_before_merge": approvals_before_merge},
+                        )
+                    )
+
+    for finding in findings:
+        db.add(finding)
+    integration.last_synced_at = datetime.utcnow()
+    integration.status = "connected"
+    integration.last_error = None
+    db.add(integration)
+    db.commit()
+    return findings
+
+
 def validate_aws_credentials(config: dict) -> dict:
     session = boto3.session.Session(
         aws_access_key_id=config.get("aws_access_key_id"),

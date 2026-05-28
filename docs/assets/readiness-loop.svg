@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="520" viewBox="0 0 1200 520" role="img" aria-label="PrivacyOps Africa Core readiness lifecycle">
+  <defs>
+    <style>
+      .title { font: 700 28px sans-serif; fill: #0f172a; }
+      .nodeTitle { font: 700 16px sans-serif; fill: #0f172a; }
+      .nodeText { font: 500 13px sans-serif; fill: #1e293b; }
+      .node { fill: #ffffff; stroke: #64748b; stroke-width: 2; rx: 14; }
+      .arrow { stroke: #334155; stroke-width: 2.5; marker-end: url(#arrowhead); fill: none; }
+    </style>
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#334155" />
+    </marker>
+  </defs>
+
+  <rect x="0" y="0" width="1200" height="520" fill="#f8fafc" />
+  <text x="38" y="52" class="title">PrivacyOps Africa Core - Real-data Readiness Loop</text>
+
+  <rect class="node" x="40" y="120" width="210" height="150" />
+  <text x="58" y="150" class="nodeTitle">1. Onboard</text>
+  <text x="58" y="174" class="nodeText">Collect organization</text>
+  <text x="58" y="194" class="nodeText">context and obligations.</text>
+  <text x="58" y="216" class="nodeText">Compute baseline score.</text>
+
+  <rect class="node" x="280" y="120" width="210" height="150" />
+  <text x="298" y="150" class="nodeTitle">2. Map Frameworks</text>
+  <text x="298" y="174" class="nodeText">Import/version packs and</text>
+  <text x="298" y="194" class="nodeText">set review trust state.</text>
+
+  <rect class="node" x="520" y="120" width="210" height="150" />
+  <text x="538" y="150" class="nodeTitle">3. Operate Workflows</text>
+  <text x="538" y="174" class="nodeText">DSR, incidents, vendors,</text>
+  <text x="538" y="194" class="nodeText">policies, and tasks.</text>
+
+  <rect class="node" x="760" y="120" width="210" height="150" />
+  <text x="778" y="150" class="nodeTitle">4. Collect Evidence</text>
+  <text x="778" y="174" class="nodeText">Upload hashed files and</text>
+  <text x="778" y="194" class="nodeText">map to controls.</text>
+
+  <rect class="node" x="1000" y="120" width="160" height="150" />
+  <text x="1016" y="150" class="nodeTitle">5. Verify</text>
+  <text x="1016" y="174" class="nodeText">GitHub/GitLab/AWS</text>
+  <text x="1016" y="194" class="nodeText">real posture sync.</text>
+
+  <rect class="node" x="380" y="320" width="420" height="140" />
+  <text x="400" y="352" class="nodeTitle">6. Report and Improve</text>
+  <text x="400" y="378" class="nodeText">Generate readiness reports, export JSON/CSV/PDF/DOCX, assign remediation tasks,</text>
+  <text x="400" y="398" class="nodeText">record audit logs, and iterate until risk is reduced.</text>
+
+  <path class="arrow" d="M250 195 L280 195" />
+  <path class="arrow" d="M490 195 L520 195" />
+  <path class="arrow" d="M730 195 L760 195" />
+  <path class="arrow" d="M970 195 L1000 195" />
+  <path class="arrow" d="M1080 270 L760 320" />
+  <path class="arrow" d="M380 390 L130 270" />
+</svg>

@@ -42,11 +42,25 @@ OpenAPI and interactive docs:
 
 - `GET /frameworks`
 - `POST /frameworks/{organization_id}`
+- `POST /frameworks/{organization_id}/packs/import`
+- `GET /frameworks/{organization_id}/{framework_id}/packs/export`
+- `PATCH /frameworks/{organization_id}/versions/{version_id}/review`
 
 ### Data Inventory / RoPA
 
 - `POST /processing-activities/{organization_id}`
 - `GET /processing-activities/{organization_id}`
+- `PATCH /processing-activities/{organization_id}/{activity_id}`
+- `DELETE /processing-activities/{organization_id}/{activity_id}`
+- `GET /processing-activities/{organization_id}/export/{format}`
+
+`GET /processing-activities/{organization_id}` supports query params:
+
+- `query`
+- `lawful_basis`
+- `risk_level`
+- `limit`
+- `offset`
 
 ### Evidence Vault
 
@@ -70,8 +84,9 @@ Supported `format`: `pdf`, `docx`, `csv`, `json`.
 
 ### Integrations
 
-- `POST /integrations/{organization_id}/connect` (GitHub currently supported)
+- `POST /integrations/{organization_id}/connect` (GitHub, GitLab, AWS supported)
 - `POST /integrations/{organization_id}/github/sync`
+- `POST /integrations/{organization_id}/gitlab/sync`
 - `POST /integrations/{organization_id}/aws/sync`
 - `GET /integrations/{organization_id}`
 - `GET /integrations/{organization_id}/findings`
@@ -91,11 +106,38 @@ Supported `format`: `pdf`, `docx`, `csv`, `json`.
 ### Incident, Vendor, DSR, Policy, Task
 
 - `POST|GET /workflows/{organization_id}/incidents`
+- `PATCH|DELETE /workflows/{organization_id}/incidents/{incident_id}`
+- `GET /workflows/{organization_id}/incidents/export/{format}`
 - `POST|GET /workflows/{organization_id}/vendors`
+- `PATCH|DELETE /workflows/{organization_id}/vendors/{vendor_id}`
+- `GET /workflows/{organization_id}/vendors/export/{format}`
 - `POST|GET /workflows/{organization_id}/dsr`
+- `PATCH|DELETE /workflows/{organization_id}/dsr/{dsr_id}`
+- `GET /workflows/{organization_id}/dsr/export/{format}`
 - `POST|GET /workflows/{organization_id}/policies`
+- `PATCH|DELETE /workflows/{organization_id}/policies/{policy_id}`
+- `GET /workflows/{organization_id}/policies/export/{format}`
 - `POST|GET /workflows/{organization_id}/tasks`
+- `PATCH|DELETE /workflows/{organization_id}/tasks/{task_id}`
 - `PATCH /workflows/{organization_id}/tasks/{task_id}/status`
+- `GET /workflows/{organization_id}/tasks/export/{format}`
+
+Workflow list endpoints support filtering and pagination via combinations of:
+
+- `query`
+- `status`
+- `risk_level`
+- `priority`
+- `limit`
+- `offset`
+
+Detailed request/response examples by OpenAPI tag:
+
+- `docs/api-workflow-vendors.md`
+- `docs/api-workflow-incidents.md`
+- `docs/api-workflow-dsr.md`
+- `docs/api-workflow-policies.md`
+- `docs/api-workflow-tasks.md`
 
 ## Trust, Billing, and Audit
 
@@ -107,6 +149,17 @@ Supported `format`: `pdf`, `docx`, `csv`, `json`.
 - `POST /billing/{organization_id}/admin-override`
 - `POST /billing/{organization_id}/checkout-session`
 - `POST /billing/webhook`
+
+## Admin and AI Controls
+
+- `GET /admin/{organization_id}/settings`
+- `PUT /admin/{organization_id}/settings`
+- `POST /admin/{organization_id}/jobs`
+- `GET /admin/{organization_id}/jobs`
+- `PATCH /admin/{organization_id}/jobs/{job_id}/{job_status}`
+- `GET /admin/{organization_id}/system-health`
+- `GET /admin/{organization_id}/integration-errors`
+- `POST /assistant/{organization_id}` (requires `ai_assistant_enabled=true`)
 
 ## Public Endpoints
 

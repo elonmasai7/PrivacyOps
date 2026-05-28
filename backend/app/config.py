@@ -2,7 +2,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    app_name: str = "PrivacyOps Africa API"
+    app_name: str = "PrivacyOps Africa Core API"
     app_env: str = "development"
     app_host: str = "0.0.0.0"
     app_port: int = 8000
@@ -17,6 +17,7 @@ class Settings(BaseSettings):
     max_upload_size_mb: int = 20
 
     github_api_base: str = "https://api.github.com"
+    gitlab_api_base: str = "https://gitlab.com/api/v4"
 
     oauth_google_client_id: str | None = None
     oauth_google_client_secret: str | None = None
